@@ -104,7 +104,7 @@ class Board:
                     self.grid[piece.coord_y][piece.coord_x] = hor_char
                     self.grid[piece.coord_y][piece.coord_x + 1] = '>'
                 elif piece.type == 'v':
-                    self.grid[piece.coord_y][piece.coord_x] = hor_char
+                    self.grid[piece.coord_y][piece.coord_x] = ver_char
                     self.grid[piece.coord_y + 1][piece.coord_x] = 'v'
 
     def display(self):
@@ -125,7 +125,7 @@ class Board:
             for j in range(len(self.grid[i])):
                 if self.grid[i][j] == single_char or self.grid[i][
                     j] == hor_char or \
-                        self.grid[i][j] == hor_char or self.grid[i][
+                        self.grid[i][j] == ver_char or self.grid[i][
                     j] == empty_char:
                     self.bdict[(i, j)] = self.grid[i][j]
                 if self.grid[i][j] == goal_char and self.grid[i][j] not in seen:
