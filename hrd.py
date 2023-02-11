@@ -301,17 +301,25 @@ class Solver:
         empty_key2 = empty_keys[1]
         pchar = empty_keys[2]
 
-        states.extend(self._find_move_piece(board, d, piece_types, pchar,
-                                            empty_key1, empty_key2))
+        if pchar != single_char:
+            temp = self._find_move_piece(state, d, piece_types, pchar,
+                                         empty_key1, empty_key2)
+            states.extend(temp)
+
+        states.extend(self._find_single_move_piece(state, d, piece_types, single_char,
+                                                      empty_key1))
+        states.extend(self._find_single_move_piece(state, d, piece_types, single_char,
+                                                      empty_key2))
         if pchar == hor_char or pchar == ver_char:
             new_char = pchar + goal_char
-            states.extend(self._find_move_piece(board, d, piece_types, new_char,
+            states.extend(self._find_move_piece(state, d, piece_types, new_char,
                                                 empty_key1, empty_key2))
 
         return states
 
-    def _find_move_piece(self, board, d, piece_types, pchar,
+    def _find_move_piece(self, state, d, piece_types, pchar,
                          empty_key1, empty_key2):
+        board = state.board
         temp_states = []
         temp_char = None
         if len(pchar) > 1:
@@ -329,16 +337,22 @@ class Solver:
                     new_board = self.move_piece(board.bdict, pchar, move_key,
                                                 empty_key1, empty_key2,
                                                 temp_char)
-                state = State(new_board, d + 1)
-                temp_states.append(state)
-            if pchar == single_char:
-                x, y = empty_key2
-                move_key = (x + dx, y + dy)
-                if move_key in board.bdict and board.bdict[move_key] == pchar:
-                    new_board = self.move_piece(board.bdict, pchar, move_key,
-                                                empty_key1)
-                    state = State(new_board, d + 1)
-                    temp_states.append(state)
+                new_state = State(new_board, d + 1, state)
+                temp_states.append(new_state)
+        return temp_states
+
+    def _find_single_move_piece(self, state, d, piece_types, pchar,
+                                empty_key):
+        board = state.board
+        temp_states = []
+        x, y = empty_key
+        for dx, dy in piece_types[pchar]:
+            move_key = (x + dx, y + dy)
+            if move_key in board.bdict and board.bdict[move_key] == pchar:
+                new_board = self.move_piece(board.bdict, pchar, move_key,
+                                            empty_key)
+                new_state = State(new_board, d + 1, state)
+                temp_states.append(new_state)
         return temp_states
 
     def move_piece(self, bdict, pchar, move_key, empty_key_1,

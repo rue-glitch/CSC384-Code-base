@@ -7,9 +7,9 @@ def test_move_single_piece_u():
     """
 
     """
-    infile1 = 'Text files/test_e1_move_single_u.txt'
+    infile1 = 'Text files/Movement tests/test_e1_move_single_u.txt'
     board1 = read_from_file(infile1)
-    infile2 = 'Text files/test_e1_move_single_r.txt'
+    infile2 = 'Text files/Movement tests/test_e1_move_single_r.txt'
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
@@ -21,9 +21,9 @@ def test_move_single_piece_d():
     """
 
     """
-    infile1 = 'Text files/test_e1_move_single_r.txt'
+    infile1 = 'Text files/Movement tests/test_e1_move_single_r.txt'
     board1 = read_from_file(infile1)
-    infile2 = 'Text files/test_e1_move_single_u.txt'
+    infile2 = 'Text files/Movement tests/test_e1_move_single_u.txt'
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
@@ -36,9 +36,9 @@ def test_move_single_piece_l():
     move_piece(self, successor_dict, move_key, empty_key_1, orientation,
                    empty_key_2=None, ptype=None)
     """
-    infile1 = 'Text files/test_e1_move_single_r_output.txt'
+    infile1 = 'Text files/Movement tests/test_e1_move_single_r_output.txt'
     board1 = read_from_file(infile1)
-    infile2 = 'Text files/test_e1_move_single_r.txt'
+    infile2 = 'Text files/Movement tests/test_e1_move_single_r.txt'
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
@@ -49,9 +49,9 @@ def test_move_single_piece_l():
 def test_move_single_piece_r():
     """
     """
-    infile1 = 'Text files/test_e1_move_single_r.txt'
+    infile1 = 'Text files/Movement tests/test_e1_move_single_r.txt'
     board1 = read_from_file(infile1)
-    infile2 = 'Text files/test_e1_move_single_r_output.txt'
+    infile2 = 'Text files/Movement tests/test_e1_move_single_r_output.txt'
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)

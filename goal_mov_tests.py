@@ -8,9 +8,9 @@ def test_move_goal_piece_u():
     move_piece(self, successor_dict, pchar, move_key, empty_key_1,
                    empty_key_2=None, orientation=None)
     """
-    infile1 = 'Text files/test_e1_move_goal_u.txt'
+    infile1 = 'Text files/Movement tests/test_e1_move_goal_u.txt'
     board1 = read_from_file(infile1)
-    infile2 = 'Text files/test_e1_move_goal_d.txt'
+    infile2 = 'Text files/Movement tests/test_e1_move_goal_d.txt'
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
@@ -19,9 +19,9 @@ def test_move_goal_piece_u():
 
 
 def test_move_goal_piece_d():
-    infile1 = 'Text files/test_e1_move_goal_d.txt'
+    infile1 = 'Text files/Movement tests/test_e1_move_goal_d.txt'
     board1 = read_from_file(infile1)
-    infile2 = 'Text files/test_e1_move_goal_u.txt'
+    infile2 = 'Text files/Movement tests/test_e1_move_goal_u.txt'
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
@@ -30,9 +30,9 @@ def test_move_goal_piece_d():
 
 
 def test_move_goal_piece_l():
-    infile1 = 'Text files/test_e1_move_goal_l.txt'
+    infile1 = 'Text files/Movement tests/test_e1_move_goal_l.txt'
     board1 = read_from_file(infile1)
-    infile2 = 'Text files/test_e1_move_goal_r.txt'
+    infile2 = 'Text files/Movement tests/test_e1_move_goal_r.txt'
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
@@ -41,9 +41,9 @@ def test_move_goal_piece_l():
 
 
 def test_move_goal_piece_r():
-    infile1 = 'Text files/test_e1_move_goal_r.txt'
+    infile1 = 'Text files/Movement tests/test_e1_move_goal_r.txt'
     board1 = read_from_file(infile1)
-    infile2 = 'Text files/test_e1_move_goal_l.txt'
+    infile2 = 'Text files/Movement tests/test_e1_move_goal_l.txt'
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
