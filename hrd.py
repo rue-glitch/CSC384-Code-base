@@ -18,7 +18,7 @@ class Piece:
     This represents a piece on the Hua Rong Dao puzzle.
     """
 
-    def __init__(self, is_goal, coord_x, coord_y, type):
+    def __init__(self, is_goal, coord_x, coord_y, ptype):
         """
         :param is_goal: True if the piece is the goal piece and False otherwise.
         :type is_goal: bool
@@ -28,25 +28,24 @@ class Piece:
         :type coord_x: int
         :param coord_y: The y coordinate of the top left corner of the piece.
         :type coord_y: int
-        :param orientation: The orientation of the piece (one of 'h' or 'v')
-            if the piece is a 1x2 piece. Otherwise, this is None
-        :type orientation: str
+        :param ptype: The type of the piece (one of '2', '1', 'v', 'h', '.'
+        :type ptype: str
         """
 
         self.is_goal = is_goal
         self.coord_x = coord_x
         self.coord_y = coord_y
-        self.type = type
+        self.ptype = ptype
 
     def __repr__(self):
         return '{} {} {} {}'.format(self.is_goal, self.coord_x,
-                                    self.coord_y, self.type)
+                                    self.coord_y, self.ptype)
 
     def print_attributes(self):
         """
         Prints attributes of the piece
         """
-        print(self.is_goal, self.coord_x, self.coord_y, self.type)
+        print(self.is_goal, self.coord_x, self.coord_y, self.ptype)
 
 
 class Board:
@@ -96,13 +95,13 @@ class Board:
                 self.grid[piece.coord_y][piece.coord_x + 1] = goal_char
                 self.grid[piece.coord_y + 1][piece.coord_x] = goal_char
                 self.grid[piece.coord_y + 1][piece.coord_x + 1] = goal_char
-            elif piece.type == single_char:
+            elif piece.ptype == single_char:
                 self.grid[piece.coord_y][piece.coord_x] = single_char
             else:
-                if piece.type == 'h':
+                if piece.ptype == 'h':
                     self.grid[piece.coord_y][piece.coord_x] = hor_char
                     self.grid[piece.coord_y][piece.coord_x + 1] = '>'
-                elif piece.type == 'v':
+                elif piece.ptype == 'v':
                     self.grid[piece.coord_y][piece.coord_x] = ver_char
                     self.grid[piece.coord_y + 1][piece.coord_x] = 'v'
 
@@ -122,10 +121,9 @@ class Board:
         seen = set()
         for i in range(len(self.grid)):
             for j in range(len(self.grid[i])):
-                if self.grid[i][j] == single_char or self.grid[i][
-                    j] == hor_char or \
-                        self.grid[i][j] == ver_char or self.grid[i][
-                    j] == empty_char:
+                if self.grid[i][j] == single_char or self.grid[i][j] == hor_char\
+                        or self.grid[i][j] == ver_char or \
+                        self.grid[i][j] == empty_char:
                     self.bdict[(i, j)] = self.grid[i][j]
                 if self.grid[i][j] == goal_char and self.grid[i][j] not in seen:
                     # it's the 2x2 piece
@@ -238,19 +236,23 @@ class Solver:
             if board.bdict[key] == single_char:
                 # know it's the empty piece
                 # check if it's neighbors exist in the keys
-                if (x1 + 1, y1) in board.bdict and board.bdict[(x1 + 1, y1)] == empty_char:
+                if (x1 + 1, y1) in board.bdict and \
+                        board.bdict[(x1 + 1, y1)] == empty_char:
                     states.append(
                         self.move_piece(successor_dict, key, (x1 + 1, y1),
                                         single_char))
-                if (x1 - 1, y1) in board.bdict and board.bdict[(x1 - 1, y1)] == empty_char:
+                if (x1 - 1, y1) in board.bdict and board.bdict[
+                    (x1 - 1, y1)] == empty_char:
                     states.append(
                         self.move_piece(successor_dict, key, (x1 - 1, y1),
                                         single_char))
-                if (x1, y1 + 1) in board.bdict and board.bdict[(x1, y1+1)] == empty_char:
+                if (x1, y1 + 1) in board.bdict and board.bdict[
+                    (x1, y1 + 1)] == empty_char:
                     states.append(
                         self.move_piece(successor_dict, key, (x1, y1 + 1),
                                         single_char))
-                if (x1, y1 - 1) in board.bdict and board.bdict[(x1, y1 - 1)] == empty_char:
+                if (x1, y1 - 1) in board.bdict and board.bdict[
+                    (x1, y1 - 1)] == empty_char:
                     states.append(
                         self.move_piece(successor_dict, key, (x1, y1 - 1),
                                         single_char))
@@ -259,25 +261,29 @@ class Solver:
                 # check if it's neighbors exist in the keys
                 if (x1 + 1, y1) in board.bdict and (
                         x1 + 1, y1 + 1) in board.bdict \
-                        and board.bdict[(x1 + 1, y1)] == empty_char and board.bdict[(x1 + 1, y1 + 1)] == empty_char:
+                        and board.bdict[(x1 + 1, y1)] == empty_char and \
+                        board.bdict[(x1 + 1, y1 + 1)] == empty_char:
                     states.append(self.move_piece(successor_dict, key,
                                                   (x1 + 1, y1), hor_char,
                                                   (x1 + 1, y1 + 1), 'r'))
                 if (x1 - 1, y1) in board.bdict and (
                         x1 - 1, y1 + 1) in board.bdict and \
-                        board.bdict[(x1 - 1, y1)] == empty_char and board.bdict[(x1 - 1, y1 + 1)] == empty_char:
+                        board.bdict[(x1 - 1, y1)] == empty_char and board.bdict[
+                    (x1 - 1, y1 + 1)] == empty_char:
                     states.append(self.move_piece(successor_dict, key,
                                                   (x1 - 1, y1 + 1), hor_char,
                                                   (x1 + 1, y1 + 1), 'r'))
                 if (x1 - 1, y1 + 1) in board.bdict and (
-                        x1 + 1, y1 + 1) in board.bdict  and \
-                        board.bdict[(x1 - 1, y1)] == empty_char and board.bdict[(x1 + 1, y1 + 1)] == empty_char:
+                        x1 + 1, y1 + 1) in board.bdict and \
+                        board.bdict[(x1 - 1, y1)] == empty_char and board.bdict[
+                    (x1 + 1, y1 + 1)] == empty_char:
                     states.append(self.move_piece(successor_dict, key,
                                                   (x1 - 1, y1 + 1), hor_char,
                                                   (x1 + 1, y1 + 1), 'r'))
                 if (x1 + 1, y1 + 1) in board.bdict and (
                         x1 + 1, y1 + 1) in board.bdict and \
-                        board.bdict[(x1 + 1, y1 + 1)] == empty_char and board.bdict[(x1 + 1, y1 + 1)] == empty_char:
+                        board.bdict[(x1 + 1, y1 + 1)] == empty_char and \
+                        board.bdict[(x1 + 1, y1 + 1)] == empty_char:
                     states.append(self.move_piece(successor_dict, key,
                                                   (x1 + 1, y1 + 1), hor_char,
                                                   (x1 + 1, y1 + 1), 'r'))
@@ -286,50 +292,56 @@ class Solver:
                 # check if it's neighbors exist in the keys
                 if (x1, y1 + 1) in board.bdict and (
                         x1 + 1, y1 + 1) in board.bdict and \
-                        board.bdict[(x1, y1 + 1)] == empty_char and board.bdict[(x1 + 1, y1 + 1)] == empty_char:
+                        board.bdict[(x1, y1 + 1)] == empty_char and board.bdict[
+                    (x1 + 1, y1 + 1)] == empty_char:
                     states.append(self.move_piece(successor_dict, key,
                                                   (x1, y1 + 1), ver_char,
                                                   (x1 + 1, y1 + 1), 'r'))
                 if (x1 - 1, y1 - 1) in board.bdict and (
                         x1 + 1, y1 - 1) in board.bdict and \
-                        board.bdict[(x1 - 1, y1 - 1)] == empty_char and board.bdict[(x1 + 1, y1 - 1)] == empty_char:
+                        board.bdict[(x1 - 1, y1 - 1)] == empty_char and \
+                        board.bdict[(x1 + 1, y1 - 1)] == empty_char:
                     states.append(self.move_piece(successor_dict, key,
                                                   (x1 - 1, y1 - 1), ver_char,
                                                   (x1 + 1, y1 - 1), 'r'))
-                if (x1 + 2, y1) in board.bdict and (x1 + 3, y1) in board.bdict and \
-                        board.bdict[(x1 + 2, y1)] == empty_char and board.bdict[(x1 + 3, y1)] == empty_char:
+                if (x1 + 2, y1) in board.bdict and (
+                        x1 + 3, y1) in board.bdict and \
+                        board.bdict[(x1 + 2, y1)] == empty_char and board.bdict[
+                    (x1 + 3, y1)] == empty_char:
                     states.append(self.move_piece(successor_dict, key,
                                                   (x1 + 2, y1), ver_char,
                                                   (x1 + 3, y1), 'u'))
-                if (x1 - 1, y1) in board.bdict and (x1 - 2, y1) in board.bdict and \
-                        board.bdict[(x1 - 1, y1)] == empty_char and board.bdict[(x1 - 2, y1)] == empty_char:
+                if (x1 - 1, y1) in board.bdict and (
+                        x1 - 2, y1) in board.bdict and \
+                        board.bdict[(x1 - 1, y1)] == empty_char and board.bdict[
+                    (x1 - 2, y1)] == empty_char:
                     states.append(self.move_piece(successor_dict, key,
                                                   (x1 - 1, y1 + 1), ver_char,
                                                   (x1 - 2, y1), 'd'))
         return states
 
-    def move_piece(self, successor_dict, move_key, empty_key_1, type,
-                   empty_key_2=None, orientation=None):
+    def move_piece(self, successor_dict, move_key, empty_key_1, orientation,
+                   empty_key_2=None, ptype=None):
         successor_dict.pop(move_key)
         successor_dict.pop(empty_key_1)
         successor_dict[move_key] = Piece(False, move_key[0],
                                          move_key[1], empty_char)
         successor_dict[empty_key_1] = Piece(False, empty_key_1[0],
                                             empty_key_1[1], single_char)
-        if type != single_char:
+        if ptype != single_char:
             successor_dict.pop(empty_key_2)
-            if type == hor_char:
+            if ptype == hor_char:
                 successor_dict = self.move_hor(successor_dict, move_key,
                                                orientation)
-            if type == ver_char:
+            if ptype == ver_char:
                 successor_dict = self.move_ver(successor_dict, move_key,
                                                orientation)
-            if type == goal_char:
+            if ptype == goal_char:
                 successor_dict = self.move_hor(successor_dict, move_key,
                                                orientation)
                 successor_dict = self.move_ver(successor_dict, move_key,
                                                orientation)
-        new_pieces = self._successor_dict_to_pieces(successor_dict)
+        new_pieces = self.successor_dict_to_pieces(successor_dict)
         new_board = Board(new_pieces)
         if new_board.bdict == successor_dict:
             return new_board
@@ -368,17 +380,7 @@ class Solver:
             x = key[0]
             y = key[1]
             char = new_dict[key]
-            if char == ver_char:  # found vertical piece
-                pieces.append(Piece(False, x, y, 'v'))
-            elif char == hor_char:  # found horizontal piece
-                pieces.append(Piece(False, x, y, 'h'))
-            elif char == single_char:
-                pieces.append(Piece(False, x, y, single_char))
-            elif char == goal_char and not g_found:
-                pieces.append(Piece(True, x, y, goal_char))
-                g_found = True
-            elif char == empty_char:
-                pieces.append(Piece(False, x, y, empty_char))
+            pieces, g_found = create_pieces_list(char, pieces, g_found, x, y)
         return pieces
 
     def dfs(self):
@@ -386,8 +388,6 @@ class Solver:
 
     def a_star(self):
         pass
-
-
 
 
 def read_from_file(filename):
@@ -409,28 +409,29 @@ def read_from_file(filename):
     for line in puzzle_file:
 
         for x, ch in enumerate(line):
-            # (is_goal, coord_x, coord_y, orientation)
-            if ch == ver_char:  # found vertical piece
-                pieces.append(Piece(False, x, line_index, 'v'))
-            elif ch == hor_char:  # found horizontal piece
-                pieces.append(Piece(False, x, line_index, 'h'))
-            elif ch == single_char:
-                pieces.append(Piece(False, x, line_index, single_char))
-            elif ch == goal_char and not g_found:
-                pieces.append(Piece(True, x, line_index, goal_char))
-                g_found = True
-            elif ch == empty_char:
-                pieces.append(Piece(False, x, line_index, empty_char))
+            pieces = create_pieces_list(ch, pieces, g_found, x, line_index)
         line_index += 1
 
     puzzle_file.close()
 
     board = Board(pieces)
 
-    # print(board.grid)
-    # [['2', '^', '2', '2'], ['2', 'v', '<', '>'], ['<', '>', '<', '>'], ['1', '1', '.', '^'], ['1', '1', '.', 'v']]
-
     return board
+
+
+def create_pieces_list(char, pieces, g_found, x, y):
+    if char == ver_char:  # found vertical piece
+        pieces.append(Piece(False, x, y, 'v'))
+    elif char == hor_char:  # found horizontal piece
+        pieces.append(Piece(False, x, y, 'h'))
+    elif char == single_char:
+        pieces.append(Piece(False, x, y, single_char))
+    elif char == goal_char and not g_found:
+        pieces.append(Piece(True, x, y, goal_char))
+        g_found = True
+    elif char == empty_char:
+        pieces.append(Piece(False, x, y, empty_char))
+    return pieces, g_found
 
 
 if __name__ == "__main__":
@@ -458,5 +459,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # read the board from the file
-    board = read_from_file(args.inputfile)
-
+    board1 = read_from_file(args.inputfile)
