@@ -320,7 +320,7 @@ class Solver:
                                                   (x1 - 2, y1), 'd'))
         return states
 
-    def move_piece(self, successor_dict, move_key, empty_key_1, orientation,
+    def move_piece(self, successor_dict, move_key, empty_key_1,
                    empty_key_2=None, ptype=None):
         x, y = move_key[0], move_key[1]
         successor_dict.pop(move_key)
@@ -332,8 +332,7 @@ class Solver:
             successor_dict.pop(empty_key_2)
             if ptype == hor_char:
                 successor_dict[empty_key_1] = hor_char
-                successor_dict = self.move_hor(successor_dict, move_key,
-                                               orientation)
+                successor_dict[(x, y + 1)] = empty_char
             if ptype == ver_char:
                 successor_dict[empty_key_1] = ver_char
                 successor_dict[(x + 1, y)] = empty_char
@@ -344,19 +343,6 @@ class Solver:
         new_board = Board(new_pieces)
         if new_board.bdict == successor_dict:
             return new_board
-
-    @staticmethod
-    def move_hor(successor_dict, move_key, orientation):
-        x, y = move_key[0], move_key[1]
-        if orientation == 'r':
-            successor_dict[(x, y + 1)] = empty_char
-        if orientation == 'l':
-            successor_dict[(x, y - 1)] = empty_char
-        if orientation == 'u':
-            successor_dict[(x, y - 1)] = empty_char
-        if orientation == 'd':
-            successor_dict[(x, y + 1)] = empty_char
-        return successor_dict
 
     @staticmethod
     def successor_dict_to_pieces(new_dict):
