@@ -54,4 +54,4 @@ def test_move_hor_piece_r():
 
 
 if __name__ == "__main__":
-    pytest.main(['horizontal_movement_tests.py'])
+    pytest.main(['horizontal_mov_tests.py'])
