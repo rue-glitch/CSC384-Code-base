@@ -17,6 +17,8 @@ def test_generate_successors():
     state = State(board1, 0)
     solver = Solver()
     states = solver.generate_successors(state)
+    for state in states:
+        print(state.board.display())
     assert states is not None
 
 
