@@ -15,11 +15,25 @@ def test_grid_to_dict():
     assert bdict == correct_dict
 
 
-def test_get_empty_space():
+def test_get_empty_space_v():
     infile = 'Text files/testhrd_easy1.txt'
     board = read_from_file(infile)
     empty_space = board.get_empty_space()
     assert empty_space == [(3, 2), (4, 2), 'v']
+
+
+def test_get_empty_space_h():
+    infile = 'Text files/test_e1_move_hor_l.txt'
+    board = read_from_file(infile)
+    empty_space = board.get_empty_space()
+    assert empty_space == [(2, 2), (2, 3), 'h']
+
+
+def test_get_empty_space_s():
+    infile = 'Text files/test_e1_move_single_r.txt'
+    board = read_from_file(infile)
+    empty_space = board.get_empty_space()
+    assert empty_space == [(0, 3), (4, 2)]
 
 
 def test_is_goal_board():
