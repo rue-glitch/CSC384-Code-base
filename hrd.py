@@ -322,25 +322,24 @@ class Solver:
 
     def move_piece(self, successor_dict, move_key, empty_key_1, orientation,
                    empty_key_2=None, ptype=None):
+        x, y = move_key[0], move_key[1]
         successor_dict.pop(move_key)
         successor_dict.pop(empty_key_1)
-        successor_dict[move_key] = Piece(False, move_key[0],
-                                         move_key[1], empty_char)
-        successor_dict[empty_key_1] = Piece(False, empty_key_1[0],
-                                            empty_key_1[1], single_char)
-        if ptype != single_char:
+        successor_dict[move_key] = empty_char
+        if ptype == single_char or ptype is None:
+            successor_dict[empty_key_1] = single_char
+        if ptype != single_char and ptype is not None:
             successor_dict.pop(empty_key_2)
             if ptype == hor_char:
+                successor_dict[empty_key_1] = hor_char
                 successor_dict = self.move_hor(successor_dict, move_key,
                                                orientation)
             if ptype == ver_char:
-                successor_dict = self.move_ver(successor_dict, move_key,
-                                               orientation)
+                successor_dict[empty_key_1] = ver_char
+                successor_dict[(x + 1, y)] = empty_char
             if ptype == goal_char:
-                successor_dict = self.move_hor(successor_dict, move_key,
-                                               orientation)
-                successor_dict = self.move_ver(successor_dict, move_key,
-                                               orientation)
+                successor_dict[empty_key_1] = goal_char
+                # TODO: figure out movement
         new_pieces = self.successor_dict_to_pieces(successor_dict)
         new_board = Board(new_pieces)
         if new_board.bdict == successor_dict:
@@ -350,26 +349,13 @@ class Solver:
     def move_hor(successor_dict, move_key, orientation):
         x, y = move_key[0], move_key[1]
         if orientation == 'r':
-            successor_dict[(x, y + 1)] = Piece(False, x, y + 1, empty_char)
+            successor_dict[(x, y + 1)] = empty_char
         if orientation == 'l':
-            successor_dict[(x, y - 1)] = Piece(False, x, y + 1, empty_char)
+            successor_dict[(x, y - 1)] = empty_char
         if orientation == 'u':
-            successor_dict[(x, y - 1)] = Piece(False, x, y + 1, empty_char)
+            successor_dict[(x, y - 1)] = empty_char
         if orientation == 'd':
-            successor_dict[(x, y + 1)] = Piece(False, x, y + 1, empty_char)
-        return successor_dict
-
-    @staticmethod
-    def move_ver(successor_dict, move_key, orientation):
-        x, y = move_key[0], move_key[1]
-        if orientation == 'r':
-            successor_dict[(x + 1, y + 1)] = Piece(False, x + 1, y, empty_char)
-        if orientation == 'l':
-            successor_dict[(x + 1, y + 1)] = Piece(False, x + 1, y, empty_char)
-        if orientation == 'u':
-            successor_dict[(x - 1, y + 1)] = Piece(False, x + 1, y, empty_char)
-        if orientation == 'd':
-            successor_dict[(x - 1, y + 1)] = Piece(False, x + 2, y, empty_char)
+            successor_dict[(x, y + 1)] = empty_char
         return successor_dict
 
     @staticmethod
@@ -380,7 +366,7 @@ class Solver:
             x = key[0]
             y = key[1]
             char = new_dict[key]
-            pieces, g_found = create_pieces_list(char, pieces, g_found, x, y)
+            pieces, g_found = create_pieces_list(char, pieces, g_found, y, x)
         return pieces
 
     def dfs(self):
@@ -409,7 +395,7 @@ def read_from_file(filename):
     for line in puzzle_file:
 
         for x, ch in enumerate(line):
-            pieces = create_pieces_list(ch, pieces, g_found, x, line_index)
+            pieces, g_found = create_pieces_list(ch, pieces, g_found, x, line_index)
         line_index += 1
 
     puzzle_file.close()
