@@ -140,10 +140,12 @@ class Board:
         for key in self.bdict:
             if self.bdict[key] == empty_char:
                 result.append(key)
-        if result[0][0] == result[1][0]:
+        if result[0][0] == result[1][0] and abs(
+                int(result[0][1]) - int(result[1][1])) == 1:
             # know it's side by side
             result.append(hor_char)
-        elif result[0][1] == result[1][1]:
+        elif result[0][1] == result[1][1] and abs(
+                int(result[0][0]) - int(result[1][0])) == 1:
             # know it's side by side
             result.append(ver_char)
         else:
@@ -160,6 +162,16 @@ class Board:
             return False
         elif self.bdict[(3, 1)] == goal_char:
             return True
+
+    def str_rep(self):
+        """
+        Returns a string representation of board
+        """
+        str_rep = ''
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[i])):
+                str_rep += self.grid[i][j]
+        return str_rep
 
 
 class State:
@@ -218,7 +230,13 @@ class State:
         pass
 
     def get_path(self):
-        pass
+        state = self
+        path = []
+        while state:
+            path.append(state.board.str_rep())
+            state = state.parent
+        path.reverse()
+        return path
 
 
 class Solver:
@@ -239,14 +257,16 @@ class Solver:
         self.frontier.append(State(board, 0))
         while len(self.frontier):
             curr = self.frontier.pop()
-            if curr.board.dict_to_str() not in seen:
-                seen.add(curr.board.dict_to_str())
+            if curr.board.str_rep() not in seen:
+                seen.add(curr.board.str_rep())
                 if curr.board.is_goal_board():
                     path = curr.get_path()
                     return path, curr.g
+                print(curr.board.str_rep(), curr.depth)
                 successors = self.generate_successors(curr)
-                self.frontier.extend(successors)
-        return None
+                for successor in successors:
+                    if successor not in seen:
+                        self.frontier.append(successor)
 
     def a_solve(self, board, seen: Optional = None):
         state = State(board, 0)
@@ -293,7 +313,7 @@ class Solver:
             single_char: [(1, 0), (-1, 0), (0, 1), (0, -1)],
             hor_char: [(-1, 0), (1, 0), (0, -2), (0, 2)],
             ver_char: [(0, -1), (0, 1), (-2, 0), (2, 0)],
-            goal_char: [(-2, 0), (2, 0), (0, -2), (0, 2)]
+            goal_char: [(-2, 0), (1, 0), (-1, 0), (0, -2), (0, 1)]
         }
 
         empty_keys = board.get_empty_space()
@@ -304,16 +324,21 @@ class Solver:
         if pchar != single_char:
             temp = self._find_move_piece(state, d, piece_types, pchar,
                                          empty_key1, empty_key2)
-            states.extend(temp)
+            for item in temp:
+                states.append(item)
 
-        states.extend(self._find_single_move_piece(state, d, piece_types, single_char,
-                                                      empty_key1))
-        states.extend(self._find_single_move_piece(state, d, piece_types, single_char,
-                                                      empty_key2))
+        temp = self._find_single_move_piece(state, d, empty_key1)
+        for item in temp:
+            states.append(item)
+        temp = self._find_single_move_piece(state, d, empty_key2)
+        for item in temp:
+            states.append(item)
         if pchar == hor_char or pchar == ver_char:
             new_char = pchar + goal_char
-            states.extend(self._find_move_piece(state, d, piece_types, new_char,
-                                                empty_key1, empty_key2))
+            temp = self._find_move_piece(state, d, piece_types, new_char,
+                                         empty_key1, empty_key2)
+            for item in temp:
+                states.append(item)
 
         return states
 
@@ -329,7 +354,7 @@ class Solver:
         for dx, dy in piece_types[pchar]:
             move_key = (x + dx, y + dy)
             if move_key in board.bdict and board.bdict[move_key] == pchar:
-                if temp_char:
+                if temp_char and (x + 1, y) == goal_char:
                     new_board = self.move_piece(board.bdict, pchar, move_key,
                                                 empty_key1, empty_key2,
                                                 temp_char)
@@ -337,23 +362,74 @@ class Solver:
                     new_board = self.move_piece(board.bdict, pchar, move_key,
                                                 empty_key1, empty_key2,
                                                 temp_char)
-                new_state = State(new_board, d + 1, state)
-                temp_states.append(new_state)
+                if new_board is not None:
+                    new_state = State(new_board, d + 1, state)
+                    temp_states.append(new_state)
         return temp_states
 
-    def _find_single_move_piece(self, state, d, piece_types, pchar,
-                                empty_key):
+    def _find_single_move_piece(self, state, d, empty_key):
         board = state.board
         temp_states = []
         x, y = empty_key
-        for dx, dy in piece_types[pchar]:
+        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
             move_key = (x + dx, y + dy)
-            if move_key in board.bdict and board.bdict[move_key] == pchar:
-                new_board = self.move_piece(board.bdict, pchar, move_key,
+            if move_key in board.bdict and board.bdict[move_key] == single_char:
+                new_board = self.move_piece(board.bdict, single_char, move_key,
                                             empty_key)
-                new_state = State(new_board, d + 1, state)
-                temp_states.append(new_state)
+                if new_board is not None:
+                    new_state = State(new_board, d + 1, state)
+                    temp_states.append(new_state)
+
+        for dx, dy in [(1, 0), (-2, 0)]:
+            move_key = (x + dx, y + dy)
+            if move_key in board.bdict and board.bdict[move_key] == ver_char:
+                successor_dict = deepcopy(board.bdict)
+                new_board = self.move_single_vertical_piece(successor_dict,
+                                                            move_key, empty_key)
+                if new_board is not None:
+                    new_state = State(new_board, d + 1, state)
+                    temp_states.append(new_state)
+        for dx, dy in [(0, 1), (0, -2)]:
+            move_key = (x + dx, y + dy)
+            if move_key in board.bdict and board.bdict[move_key] == hor_char:
+                successor_dict = deepcopy(board.bdict)
+                new_board = self.move_single_horizontal_piece(successor_dict,
+                                                              move_key, empty_key)
         return temp_states
+
+    def move_single_vertical_piece(self, successor_dict, move_key, empty_key):
+        x, y = move_key[0], move_key[1]
+        successor_dict.pop(move_key)
+        successor_dict.pop(empty_key)
+        if x + 2 == empty_key[0]:
+            # empty piece is at the bottom
+            successor_dict[(x + 1, y)] = ver_char
+            successor_dict[move_key] = empty_char
+        elif x - 1 == empty_key[0]:
+            # empty piece is at the top
+            successor_dict[(x - 1, y)] = ver_char
+            successor_dict[(x + 1, y)] = empty_char
+        new_pieces = self.successor_dict_to_pieces(successor_dict)
+        new_board = Board(new_pieces)
+        if new_board is not None and new_board.bdict == successor_dict:
+            return new_board
+
+    def move_single_horizontal_piece(self, successor_dict, move_key, empty_key):
+        x, y = move_key[0], move_key[1]
+        successor_dict.pop(move_key)
+        successor_dict.pop(empty_key)
+        if y + 2 == empty_key[1]:
+            # empty piece is at the left
+            successor_dict[(x, y + 1)] = hor_char
+            successor_dict[move_key] = empty_char
+        elif y - 1 == empty_key[1]:
+            # empty piece is at the top
+            successor_dict[(x, y - 1)] = hor_char
+            successor_dict[(x, y + 1)] = empty_char
+        new_pieces = self.successor_dict_to_pieces(successor_dict)
+        new_board = Board(new_pieces)
+        if new_board is not None and new_board.bdict == successor_dict:
+            return new_board
 
     def move_piece(self, bdict, pchar, move_key, empty_key_1,
                    empty_key_2=None, orientation=None):
@@ -378,10 +454,11 @@ class Solver:
                                                       empty_key_1, orientation)
         new_pieces = self.successor_dict_to_pieces(successor_dict)
         new_board = Board(new_pieces)
-        if new_board.bdict == successor_dict:
+        if new_board is not None and new_board.bdict == successor_dict:
             return new_board
 
-    def move_goal_piece(self, successor_dict, move_key, empty_key_1, orientation):
+    def move_goal_piece(self, successor_dict, move_key, empty_key_1,
+                        orientation):
         x, y = move_key[0], move_key[1]
         if orientation == ver_char:
             if y + 2 == empty_key_1[1]:
@@ -436,7 +513,7 @@ def read_from_file(filename):
 
     for line in puzzle_file:
 
-        for x, ch in enumerate(line):
+        for x, ch in enumerate(line.strip()):
             pieces, g_found = create_pieces_list(ch, pieces, g_found, x,
                                                  line_index)
         line_index += 1
