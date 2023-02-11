@@ -3,6 +3,30 @@ from copy import deepcopy
 import pytest
 
 
+def test_move_shor_piece_l():
+    infile1 = 'Text files/Movement tests/test_e1_move_shor_l.txt'
+    board1 = read_from_file(infile1)
+    infile2 = 'Text files/Movement tests/test_e1_move_shor_r.txt'
+    board2 = read_from_file(infile2)
+    solver = Solver()
+    successor_dict = deepcopy(board1.bdict)
+    # move_single_vertical_piece(self, bdict, move_key, empty_key)
+    new_board = solver.move_single_horizontal_piece(successor_dict, (2, 1), (2, 0))
+    assert new_board.bdict == board2.bdict
+
+
+def test_move_shor_piece_r():
+    infile1 = 'Text files/Movement tests/test_e1_move_shor_r.txt'
+    board1 = read_from_file(infile1)
+    infile2 = 'Text files/Movement tests/test_e1_move_shor_l.txt'
+    board2 = read_from_file(infile2)
+    solver = Solver()
+    successor_dict = deepcopy(board1.bdict)
+    # move_single_vertical_piece(self, bdict, move_key, empty_key)
+    new_board = solver.move_single_horizontal_piece(successor_dict, (2, 0), (2, 2))
+    assert new_board.bdict == board2.bdict
+
+
 def test_move_hor_piece_u():
     """
     move_piece(self, successor_dict, pchar, move_key, empty_key_1,
