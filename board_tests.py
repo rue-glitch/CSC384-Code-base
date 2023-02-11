@@ -16,12 +16,14 @@ def test_grid_to_dict():
 
 
 def test_get_empty_space():
-    pass
+    infile = 'testhrd_easy1.txt'
+    board = read_from_file(infile)
 
 
-def is_goal_board():
-    pass
+def test_is_goal_board():
+    infile = 'testhrd_easy1.txt'
+    board = read_from_file(infile)
 
 
 if __name__ == "__main__":
-    pytest.main(['program_tests.py'])
+    pytest.main(['board_tests.py'])

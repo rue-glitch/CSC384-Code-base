@@ -92,7 +92,6 @@ class Board:
 
         for piece in self.pieces:
             if piece.is_goal:
-                print(piece.coord_x, piece.coord_y)
                 self.grid[piece.coord_y][piece.coord_x] = goal_char
                 self.grid[piece.coord_y][piece.coord_x + 1] = goal_char
                 self.grid[piece.coord_y + 1][piece.coord_x] = goal_char
@@ -214,6 +213,9 @@ class State:
         """
         Keeps track of the state's advanced f value
         """
+        pass
+
+    def get_path(self):
         pass
 
 
@@ -359,7 +361,7 @@ class Solver:
         return successor_dict
 
     @staticmethod
-    def _successor_dict_to_pieces(new_dict):
+    def successor_dict_to_pieces(new_dict):
         pieces = []
         g_found = False
         for key in new_dict:
@@ -385,8 +387,7 @@ class Solver:
     def a_star(self):
         pass
 
-    def get_solution(self):
-        pass
+
 
 
 def read_from_file(filename):
