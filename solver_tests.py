@@ -25,7 +25,7 @@ def test_move_single_piece_u():
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
-    new_board = solver.move_piece(successor_dict, (4, 2), (3, 2), 'u')
+    new_board = solver.move_piece(successor_dict, (4, 2), (3, 2))
     assert new_board.bdict == board2.bdict
 
 
@@ -39,7 +39,7 @@ def test_move_single_piece_d():
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
-    new_board = solver.move_piece(successor_dict, (3, 2), (4, 2), 'd')
+    new_board = solver.move_piece(successor_dict, (3, 2), (4, 2))
     assert new_board.bdict == board2.bdict
 
 
@@ -54,7 +54,7 @@ def test_move_single_piece_l():
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
-    new_board = solver.move_piece(successor_dict, (0, 3), (0, 2), 'l')
+    new_board = solver.move_piece(successor_dict, (0, 3), (0, 2))
     assert new_board.bdict == board2.bdict
 
 
@@ -67,7 +67,7 @@ def test_move_single_piece_r():
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
-    new_board = solver.move_piece(successor_dict, (0, 2), (0, 3), 'r')
+    new_board = solver.move_piece(successor_dict, (0, 2), (0, 3))
     assert new_board.bdict == board2.bdict
 
 
@@ -78,7 +78,7 @@ def test_move_ver_piece_u():
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
-    new_board = solver.move_piece(successor_dict, (2, 3), (0, 3), 'u', (1, 3), '^')
+    new_board = solver.move_piece(successor_dict, (2, 3), (0, 3), (1, 3), '^')
     assert new_board.bdict == board2.bdict
 
 
@@ -89,7 +89,7 @@ def test_move_ver_piece_d():
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
-    new_board = solver.move_piece(successor_dict, (0, 3), (2, 3), 'd', (3, 3), '^')
+    new_board = solver.move_piece(successor_dict, (0, 3), (2, 3), (3, 3), '^')
     assert new_board.bdict == board2.bdict
 
 
@@ -100,7 +100,7 @@ def test_move_ver_piece_l():
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
-    new_board = solver.move_piece(successor_dict, (3, 3), (3, 2), 'l', (4, 2), '^')
+    new_board = solver.move_piece(successor_dict, (3, 3), (3, 2), (4, 2), '^')
     assert new_board.bdict == board2.bdict
 
 
@@ -111,12 +111,8 @@ def test_move_ver_piece_r():
     board2 = read_from_file(infile2)
     solver = Solver()
     successor_dict = deepcopy(board1.bdict)
-    new_board = solver.move_piece(successor_dict, (3, 2), (3, 3), 'r', (4, 3), '^')
+    new_board = solver.move_piece(successor_dict, (3, 2), (3, 3), (4, 3), '^')
     assert new_board.bdict == board2.bdict
-
-
-def test_move_hor_piece():
-    pass
 
 
 if __name__ == "__main__":
