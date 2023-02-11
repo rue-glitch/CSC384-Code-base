@@ -156,7 +156,7 @@ class Board:
         # check if the 2x2 piece is in the right position
         if (3, 1) not in self.bdict.keys():
             return False
-        elif self.bdict[(3, 1)].is_goal:
+        elif self.bdict[(3, 1)] == goal_char:
             return True
 
 
