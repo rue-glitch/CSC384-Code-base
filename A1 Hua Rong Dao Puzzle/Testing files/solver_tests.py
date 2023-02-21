@@ -1,5 +1,4 @@
-from hrd import Piece, Board, State, Solver, read_from_file, write_output_file
-from copy import deepcopy
+from hrd import Solver, read_from_file, write_output_file
 import pytest
 
 
