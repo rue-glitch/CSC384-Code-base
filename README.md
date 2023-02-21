@@ -1,2 +1,5 @@
-# CSC384-A-1
-CSC394 Winter 2022 Assignment 1 - Hua Rong Dao Puzzle
+# CSC384 Winter 2022 
+Assignments done in CSC384 Winter 2022 
+
+1. Assignment 1 - Hua Rong Dao Puzzle
+2. Assignment 2 - Checkers [Standard English Draughts]
