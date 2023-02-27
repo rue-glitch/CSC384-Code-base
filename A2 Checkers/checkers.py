@@ -142,8 +142,7 @@ class Board:
                 grid[piece[0]][piece[1]] = key
         return grid
 
-
-    def get_moves(self, player, piece):
+    def get_piece_moves(self, player, piece):
         """
         Returns the moves for a specific piece on a board
 
@@ -153,7 +152,8 @@ class Board:
         moves = {}
         lcol, rcol = piece[1] - 1, piece[1] + 1
         row = piece[0]
-
+        # works if given correct player but incorrect index -> TODO: check if
+        # this is a problem in game play
         # need to figure out how to remove players who become kings
         if player == 'r':
             # need to move upward
@@ -179,7 +179,7 @@ class Board:
             moves.update(self.move_left(row -1, max(row -3, -1), -1, player, lcol))
             moves.update(self.move_right(row -1, max(row -3, -1), -1, player, rcol))
         self.legal_moves.extend(moves)
-        return {piece: moves}
+        return moves
 
     def move_left(self, start, stop, step, color, lcol, skipped=[]):
         moves = {}
@@ -436,12 +436,12 @@ class Game:
         # gets moves for each piece
         for piece in board.pdict[player]:
             # get all valid moves for the piece
-            possible_moves = board.get_moves(player, piece)
+            possible_moves = board.get_piece_moves(player, piece)
             moves[(piece, player)] = self.forced_capture(possible_moves)
         # get moves for the king too
         for piece in board.pdict[player.upper()]:
             # get all valid moves for the piece
-            moves[(piece, player.upper())] = board.get_moves(player, piece)
+            moves[(piece, player.upper())] = board.get_piece_moves(player, piece)
         return moves
 
     def forced_capture(self, moves):
