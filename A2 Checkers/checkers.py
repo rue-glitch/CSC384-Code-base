@@ -147,14 +147,16 @@ class Board:
         Returns the moves for a specific piece on a board
 
         Moves is a dictionary where the key is the new position of a particular
-        piece and the value is either the pieces skipped or nothing?
+        piece and the value is either the pieces skipped or empty list if it
+        takes the spot of an empty piece
+        TODO: need to remove the empty piece that gets occupied
         """
         moves = {}
         lcol, rcol = piece[1] - 1, piece[1] + 1
         row = piece[0]
-        # works if given correct player but incorrect index -> TODO: check if
-        # this is a problem in game play
-        # need to figure out how to remove players who become kings
+        # works if given correct player but incorrect index
+        # TODO: check if this is a problem in game play
+        # TODO: need to figure out how to remove players who become kings
         if player == 'r':
             # need to move upward
             moves.update(self.move_left(row -1, max(row -3, -1), -1, player, lcol))
@@ -169,12 +171,12 @@ class Board:
             moves.update(self.move_right(row + 1, max(row + 3, 7), 1, player, rcol))
         elif player == 'b':
             # need to move downward
-            moves.update(self.move_left(row + 1, min(row + 3, 7), 1, player, lcol))
-            moves.update(self.move_right(row + 1, min(row + 3, 7), 1, player, rcol))
+            moves.update(self.move_left(row + 1, min(row + 3, 8), 1, player, lcol))
+            moves.update(self.move_right(row + 1, min(row + 3, 8), 1, player, rcol))
         elif player == 'B':
             # need to move downward
-            moves.update(self.move_left(row + 1, min(row + 3, 7), 1, player, lcol))
-            moves.update(self.move_right(row + 1, min(row + 3, 7), 1, player, rcol))
+            moves.update(self.move_left(row + 1, min(row + 3, 8), 1, player, lcol))
+            moves.update(self.move_right(row + 1, min(row + 3, 8), 1, player, rcol))
             # need to move upward, same functionality as r
             moves.update(self.move_left(row -1, max(row -3, -1), -1, player, lcol))
             moves.update(self.move_right(row -1, max(row -3, -1), -1, player, rcol))
@@ -187,10 +189,8 @@ class Board:
         for row in range(start, stop, step):
             # check if current piece is an empty piece
             index = (row, lcol)
-
             if lcol < 0:
                 break
-
             if index in self.pdict['.']:
                 if skipped and not seen:
                     break
@@ -201,8 +201,8 @@ class Board:
                     if row == 0:
                         break
                 else:
-                    # we know it's any empty piece and we just pass the index with
-                    # an empty list as we don't skip over any pieces
+                    # we know it's any empty piece and we just pass the index
+                    # with an empty list as we don't skip over any pieces
                     moves[index] = seen
                 if seen:
                     # found something of the other color
@@ -211,8 +211,10 @@ class Board:
                         new_row = max(row-3, -1)
                     else:
                         new_row = min(row+3, 7)
-                    moves.update(self.move_left(row + step, new_row, step, color, lcol -1, skipped=seen))
-                    moves.update(self.move_right(row + step, new_row, step, color, lcol + 1, skipped=seen))
+                    moves.update(self.move_left(row + step, new_row, step,
+                                                color, lcol -1, skipped=seen))
+                    moves.update(self.move_right(row + step, new_row, step,
+                                                 color, lcol + 1, skipped=seen))
                 break
             elif index in self.pdict[color]:
                 # we know it's not a skippable piece
@@ -254,8 +256,8 @@ class Board:
                     if row == 7:
                         break
                 else:
-                    # we know it's any empty piece and we just pass the index with
-                    # an empty list as we don't skip over any pieces
+                    # we know it's any empty piece and we just pass the index
+                    # with an empty list as we don't skip over any pieces
                     moves[index] = seen
                 if seen:
                     # found something of the other color
@@ -264,8 +266,10 @@ class Board:
                         new_row = max(row-3, -1)
                     else:
                         new_row = min(row+3, 8)
-                    moves.update(self.move_left(row + step, new_row, step, color, rcol -1, skipped=seen))
-                    moves.update(self.move_right(row + step, new_row, step, color, rcol + 1, skipped=seen))
+                    moves.update(self.move_left(row + step, new_row, step,
+                                                color, rcol -1, skipped=seen))
+                    moves.update(self.move_right(row + step, new_row, step,
+                                                 color, rcol + 1, skipped=seen))
                 break
             elif index in self.pdict[color]:
                 # we know it's not a skippable piece
@@ -292,9 +296,11 @@ class Board:
 
     def utility(self):
         if self.turn == 'Red':
-            return self.red_pieces + self.red_kings*2 - self.black_pieces + self.black_kings*2
+            return self.red_pieces + self.red_kings*2 - self.black_pieces + \
+                   self.black_kings*2
         elif self.turn == 'Black':
-            return self.black_pieces + self.black_kings*2 - self.red_pieces - self.red_kings*2
+            return self.black_pieces + self.black_kings*2 - self.red_pieces - \
+                   self.red_kings*2
 
     def grid_to_str(self):
         string = ''
