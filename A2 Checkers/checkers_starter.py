@@ -34,14 +34,6 @@ def get_next_turn(curr_turn):
     else:
         return 'r'
 
-def read_from_file(filename):
-
-    f = open(filename)
-    lines = f.readlines()
-    board = [[str(x) for x in l.rstrip()] for l in lines]
-    f.close()
-
-    return board
 
 if __name__ == '__main__':
 
