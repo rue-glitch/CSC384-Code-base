@@ -15,7 +15,7 @@ def test_r_movements():
 
 
 def test_r_king_movements():
-    filename = 'r_king_moves.txt'
+    """filename = 'r_king_moves.txt'
     grid = read_from_file(filename)
     board = Board(grid)
     moves = board.get_piece_moves('R', (4, 6))
@@ -25,8 +25,23 @@ def test_r_king_movements():
     assert (3, 7) in moves.keys() and moves[(3, 7)] == []
     # ove down
     assert (5, 5) in moves.keys() and moves[(5, 5)] == []
+    assert (5, 7) in moves.keys() and moves[(5, 7)] == []"""
+    pass
+
+
+def test_r_king_multi_jump():
+    filename = 'r_king_moves.txt'
+    grid = read_from_file(filename)
+    board = Board(grid)
+    moves = board.get_piece_moves('R', (4, 6))
+    print(moves)
+    # multi jumps
+    assert (2, 4) in moves.keys() and moves[(2, 4)] != []
+    assert (0, 2) in moves.keys() and moves[(0, 2)] != []
+    # move up
+    assert (3, 7) in moves.keys() and moves[(3, 7)] == []
+    # ove down
+    assert (5, 5) in moves.keys() and moves[(5, 5)] == []
     assert (5, 7) in moves.keys() and moves[(5, 7)] == []
-
-
 
 

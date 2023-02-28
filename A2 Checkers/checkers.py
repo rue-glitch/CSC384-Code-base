@@ -156,7 +156,6 @@ class Board:
         row = piece[0]
         # works if given correct player but incorrect index
         # TODO: check if this is a problem in game play
-        # TODO: need to figure out how to remove players who become kings
         if player == 'r':
             # need to move upward
             moves.update(self.move_left(row -1, max(row -3, -1), -1, player, lcol))
@@ -368,6 +367,7 @@ class Game:
     """
 
     def alphabeta(self, depth, state, max_player, alpha, beta):
+        # TODO: redo function as game tree redoes
         if depth == 0 or state.endgame():
             val = state.board.utility()
             return state.board.utility(), state.board
@@ -450,7 +450,8 @@ class Game:
             moves[(piece, player.upper())] = board.get_piece_moves(player, piece)
         return moves
 
-    def forced_capture(self, moves):
+    @staticmethod
+    def forced_capture(moves):
         capture = False
         capturing_moves = {}
         for move in moves:
