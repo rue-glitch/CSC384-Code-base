@@ -11,15 +11,16 @@ cache = {}  # you can use this to implement state caching!
 class State:
     # This class is used to represent a state.
     # board : a list of lists that represents the 8*8 board
-    def __init__(self, board, parent=None, child=None):
-        self.parent = parent
-        self.child = child
+    def __init__(self, board, depth=None, parent=None, child=None):
         self.board = board
-        self.width = 8
-        self.height = 8
+        self.parent = parent
+        if depth is None:
+            self.depth = 0
+        self.depth = depth
+        self.child = child
 
     def display(self):
-        for i in self.board:
+        for i in self.board.grid:
             for j in i:
                 print(j, end="")
             print("")
@@ -145,45 +146,65 @@ class Board:
     def get_piece_moves(self, player, piece):
         """
         Returns the moves for a specific piece on a board
-
         Moves is a dictionary where the key is the new position of a particular
         piece and the value is either the pieces skipped or empty list if it
         takes the spot of an empty piece
-        TODO: need to remove the empty piece that gets occupied
         """
         moves = {}
         lcol, rcol = piece[1] - 1, piece[1] + 1
         row = piece[0]
-        # works if given correct player but incorrect index
-        # TODO: check if this is a problem in game play
         if player == 'r':
             # need to move upward
-            moves.update(self.move_left(row -1, max(row -3, -1), -1, player, lcol))
-            moves.update(self.move_right(row -1, max(row -3, -1), -1, player, rcol))
+            moves.update(
+                self.move_left(row - 1, max(row - 3, -1), -1, player, lcol, {}))
+            moves.update(
+                self.move_right(row - 1, max(row - 3, -1), -1, player, rcol,
+                                {}))
         elif player == 'R':
             # need to move upward
-            moves.update(self.move_left(row -1, max(row -3, -1), -1, player, lcol))
-            moves.update(self.move_right(row -1, max(row -3, -1), -1, player, rcol))
+            player_lower = player.lower()
+            moves.update(
+                self.move_left(row - 1, max(row - 3, -1), -1, player_lower,
+                               lcol, {}))
+            moves.update(
+                self.move_right(row - 1, max(row - 3, -1), -1, player_lower,
+                                rcol, {}))
             # need to move backward - utilizes the same functionality as b
             # so we'll reuse the b movements
-            moves.update(self.move_left(row + 1, max(row + 3, 7), 1, player, lcol))
-            moves.update(self.move_right(row + 1, max(row + 3, 7), 1, player, rcol))
+            moves.update(
+                self.move_left(row + 1, max(row + 3, 7), 1, player_lower, lcol,
+                               {}))
+            moves.update(
+                self.move_right(row + 1, max(row + 3, 7), 1, player_lower, rcol,
+                                {}))
         elif player == 'b':
             # need to move downward
-            moves.update(self.move_left(row + 1, min(row + 3, 8), 1, player, lcol))
-            moves.update(self.move_right(row + 1, min(row + 3, 8), 1, player, rcol))
+            moves.update(
+                self.move_left(row + 1, min(row + 3, 8), 1, player, lcol, {}))
+            moves.update(
+                self.move_right(row + 1, min(row + 3, 8), 1, player, rcol, {}))
         elif player == 'B':
             # need to move downward
-            moves.update(self.move_left(row + 1, min(row + 3, 8), 1, player, lcol))
-            moves.update(self.move_right(row + 1, min(row + 3, 8), 1, player, rcol))
+            player_lower = player.lower()
+            moves.update(
+                self.move_left(row + 1, min(row + 3, 8), 1, player_lower, lcol,
+                               {}))
+            moves.update(
+                self.move_right(row + 1, min(row + 3, 8), 1, player_lower, rcol,
+                                {}))
             # need to move upward, same functionality as r
-            moves.update(self.move_left(row -1, max(row -3, -1), -1, player, lcol))
-            moves.update(self.move_right(row -1, max(row -3, -1), -1, player, rcol))
+            moves.update(
+                self.move_left(row - 1, max(row - 3, -1), -1, player_lower,
+                               lcol, {}))
+            moves.update(
+                self.move_right(row - 1, max(row - 3, -1), -1, player_lower,
+                                rcol, {}))
         self.legal_moves.extend(moves)
         return moves
 
-    def move_left(self, start, stop, step, color, lcol, skipped=[]):
-        moves = {}
+    def move_left(self, start, stop, step, player, lcol, moves, skipped=None):
+        if skipped is None:
+            skipped = []
         seen = []
         for row in range(start, stop, step):
             # check if current piece is an empty piece
@@ -194,52 +215,50 @@ class Board:
                 if skipped and not seen:
                     break
                 elif skipped:
-                    # need to figure out the king situation
+                    # deleting old key-pair
+                    prev_empty_space = (skipped[0][0] - 1, skipped[0][1] - 1)
+                    if prev_empty_space in moves:
+                        del moves[prev_empty_space]
                     moves[index] = seen + skipped
                     seen = seen + skipped
                     if row == 0:
                         break
                 else:
-                    # we know it's any empty piece and we just pass the index
-                    # with an empty list as we don't skip over any pieces
+                    # we know it's just an empty piece
                     moves[index] = seen
                 if seen:
                     # found something of the other color
                     # need to check number of jumps
                     if step == -1:
-                        new_row = max(row-3, -1)
+                        new_row = max(row - 3, -1)
                     else:
-                        new_row = min(row+3, 7)
+                        new_row = min(row + 3, 7)
                     moves.update(self.move_left(row + step, new_row, step,
-                                                color, lcol -1, skipped=seen))
+                                                player, lcol - 1, moves, seen))
                     moves.update(self.move_right(row + step, new_row, step,
-                                                 color, lcol + 1, skipped=seen))
+                                                 player, lcol + 1, moves, seen))
                 break
-            elif index in self.pdict[color]:
+            elif index in self.pdict[player] or index in self.pdict[
+                player.upper()]:
                 # we know it's not a skippable piece
                 # need to check if the next piece is empty or not
                 break
-            elif color == 'r' or color == 'R' and index in self.pdict['b']:
+            elif player == 'r' and (index in self.pdict['b'] or
+                                    index in self.pdict['B']):
                 # we know it's a skippable piece
                 # need to check if the next piece is empty or not
                 seen = [index]
-            elif color == 'b' or color == 'B' and index in self.pdict['r']:
-                # we know it's a skippable piece
-                # need to check if the next piece is empty or not
-                seen = [index]
-            elif color == 'r' or color == 'R' and index in self.pdict['B']:
-                # we know it's a skippable piece
-                # need to check if the next piece is empty or not
-                seen = [index]
-            elif color == 'b' or color == 'B' and index in self.pdict['R']:
+            elif player == 'b' and (index in self.pdict['r']
+                                    or index in self.pdict['R']):
                 # we know it's a skippable piece
                 # need to check if the next piece is empty or not
                 seen = [index]
             lcol -= 1
         return moves
 
-    def move_right(self, start, stop, step, color, rcol, skipped=[]):
-        moves = {}
+    def move_right(self, start, stop, step, player, rcol, moves, skipped=None):
+        if skipped is None:
+            skipped = []
         seen = []
         for row in range(start, stop, step):
             index = (row, rcol)
@@ -250,6 +269,10 @@ class Board:
                 if skipped and not seen:
                     break
                 elif skipped:
+                    # deleting old key-pair
+                    prev_empty_space = (skipped[0][0] - 1, skipped[0][1] - 1)
+                    if prev_empty_space in moves:
+                        del moves[prev_empty_space]
                     moves[index] = seen + skipped
                     seen = seen + skipped
                     if row == 7:
@@ -262,44 +285,31 @@ class Board:
                     # found something of the other color
                     # need to check number of jumps
                     if step == -1:
-                        new_row = max(row-3, -1)
+                        new_row = max(row - 3, -1)
                     else:
-                        new_row = min(row+3, 8)
+                        new_row = min(row + 3, 8)
                     moves.update(self.move_left(row + step, new_row, step,
-                                                color, rcol -1, skipped=seen))
+                                                player, rcol - 1, moves, seen))
                     moves.update(self.move_right(row + step, new_row, step,
-                                                 color, rcol + 1, skipped=seen))
+                                                 player, rcol + 1, moves, seen))
                 break
-            elif index in self.pdict[color]:
+            elif index in self.pdict[player] or index in self.pdict[
+                player.upper()]:
                 # we know it's not a skippable piece
                 # need to check if the next piece is empty or not
                 break
-            elif color == 'r' or color == 'R' and index in self.pdict['b']:
+            elif player == 'r' and (index in self.pdict['b'] or
+                                    index in self.pdict['B']):
                 # we know it's a skippable piece
                 # need to check if the next piece is empty or not
                 seen = [index]
-            elif color == 'b' or color == 'B' and index in self.pdict['r']:
-                # we know it's a skippable piece
-                # need to check if the next piece is empty or not
-                seen = [index]
-            elif color == 'r' or color == 'R' and index in self.pdict['B']:
-                # we know it's a skippable piece
-                # need to check if the next piece is empty or not
-                seen = [index]
-            elif color == 'b' or color == 'B' and index in self.pdict['R']:
+            elif player == 'b' and (index in self.pdict['r'] or
+                                    index in self.pdict['R']):
                 # we know it's a skippable piece
                 # need to check if the next piece is empty or not
                 seen = [index]
             rcol += 1
         return moves
-
-    def utility(self):
-        if self.turn == 'Red':
-            return self.red_pieces + self.red_kings*2 - self.black_pieces + \
-                   self.black_kings*2
-        elif self.turn == 'Black':
-            return self.black_pieces + self.black_kings*2 - self.red_pieces - \
-                   self.red_kings*2
 
     def grid_to_str(self):
         string = ''
@@ -313,32 +323,6 @@ class Game:
 
     def __init__(self):
         self.seen = set()
-
-    def minimax(self, depth, state, max_player):
-        # At the last state in the tree or won the game
-        if depth == 0 or state.endgame():
-            return state.board.utility(), state.board
-
-        if max_player:
-            max_val = -math.inf
-            best_move = None
-            for move in self.get_children(state, 'r'):
-                move.board.turn = 'Black'
-                value = self.minimax(depth - 1, move, False)[0]
-                max_val = max(max_val, value)
-                if max_val == value:
-                    best_move = move.board
-            return max_val, best_move
-        else:
-            min_val = math.inf
-            best_move = None
-            for move in self.get_children(state, 'b'):
-                move.board.turn = 'Red'
-                value = self.minimax(depth - 1, move, True)[0]
-                min_val = min(min_val, value)
-                if min_val == value:
-                    best_move = move.board
-            return min_val, best_move
 
     """
     def alphabeta(self, depth, board, max_player, alpha, beta):
@@ -364,59 +348,230 @@ class Game:
                 if min_val == value[0]:
                     best_move = value[1]
             return min_val, best_move
+            
+    
     """
 
-    def alphabeta(self, depth, state, max_player, alpha, beta):
-        # TODO: redo function as game tree redoes
+    def alphabeta(self, state, depth, max_player, alpha, beta):
         if depth == 0 or state.endgame():
-            val = state.board.utility()
-            return state.board.utility(), state.board
+            v = self.utility(max_player)
+            return v, state
 
         if max_player:
+            if self.cutoff(state, depth):
+                return self.eval(state, max_player), state
             max_val = -math.inf
             best_move = None
-            for move in self.get_children(state, 'r'):
+            children = self.get_children(state, 'r')
+            for move in children:
                 move.board.turn = 'Black'
-                value = self.alphabeta(depth-1, move, False, alpha, beta)[0]
-                max_val = max(max_val, value)
-                alpha = max(max_val, alpha)
+                move_str = move.board.grid_to_str()
+                if move_str in cache:
+                    val = cache[move_str]
+                else:
+                    val = self.alphabeta(move, depth - 1, False, alpha, beta)[0]
+                    cache[move_str] = val
+                max_val = max(max_val, val)
+                alpha = max(alpha, val)
                 if beta <= alpha:
+                    # prune the remaining children
                     break
-                if max_val == value:
-                    best_move = move.board
+                if max_val == val:
+                    best_move = move
             return max_val, best_move
         else:
+            if self.cutoff(state, depth):
+                return self.eval(state, False), state
             min_val = math.inf
             best_move = None
             for move in self.get_children(state, 'b'):
                 move.board.turn = 'Red'
-                value = self.alphabeta(depth-1, move, True, alpha, beta)[0]
-                min_val = min(min_val, value)
-                beta = min(min_val, beta)
+                move_str = move.board.grid_to_str()
+                if move_str in cache:
+                    val = cache[move_str]
+                else:
+                    val = self.alphabeta(move, depth - 1, True, alpha, beta)[0]
+                    cache[move_str] = val
+                min_val = min(min_val, val)
+                beta = min(beta, val)
                 if beta <= alpha:
+                    # prune the remaining children
                     break
-                if min_val == value:
-                    best_move = move.board
+                if min_val == val:
+                    best_move = move
             return min_val, best_move
+
+    def alphabeta_max_node(self, state, max_player, alpha, beta, current_depth, start_time):
+        # checking cached state's depth
+        # cache[state] = (val, depth, successor_list)
+        str_state = state.board.grid_to_str()
+        curr_time = time.perf_counter()
+        if start_time - curr_time == 110:
+            return state
+        if str_state in cache and cache[str_state][1] >= current_depth:
+            return cache[str_state][0], cache[str_state][2]
+        if current_depth == 0:
+            return self.eval(state, max_player), None
+        successor_list = self.get_children(state, max_player)
+        if not successor_list:
+            cache[str_state] = (-1000000000, current_depth, None)
+            return -1000000000, None
+        # sort the successor states based on heuristic_evaluation
+        # successors is a list of state objects
+        sorted_successors = self.sort_successors(successor_list, max_player)
+        v = - math.inf
+        best = state
+        for successor in sorted_successors:
+            tempval, tempstate = self.alphabeta_min_node(successor, False,
+                                                         alpha, beta,
+                                                         current_depth - 1,
+                                                                start_time)
+            if tempval > v:
+                v = tempval
+                best = successor
+            if tempval > beta:
+                cache[str_state] = (v, current_depth, successor)
+                return v, successor
+            alpha = max(alpha, tempval)
+            cache[str_state] = (v, current_depth, best)
+        return v, best
+
+    def alphabeta_min_node(self, state, min_player, alpha, beta, current_depth, start_time):
+        # checking cached state's depth
+        # cache[state] = (val, depth, successor_list)
+        str_state = state.board.grid_to_str()
+        curr_time = time.perf_counter()
+        if start_time - curr_time == 110:
+            return state
+        if str_state in cache and cache[str_state][1] >= current_depth:
+            return cache[str_state][0], cache[str_state][2]
+        if current_depth == 0:
+            return self.eval(state, min_player), None
+        successor_list = self.get_children(state, min_player)
+        if not successor_list:
+            cache[str_state] = (1000000000, current_depth, None)
+            return 1000000000, None
+        # sort the successor states based on heuristic_evaluation
+        sorted_successors = self.sort_successors(successor_list, min_player)
+        v = math.inf
+        best = state
+        for successor in sorted_successors:
+            tempval, tempstate = self.alphabeta_max_node(successor, True, alpha,
+                                                         beta,
+                                                         current_depth - 1,
+                                                                start_time)
+            if tempval < v:
+                v = tempval
+                best = successor
+            if tempval < alpha:
+                cache[str_state] = (v, current_depth, successor)
+                return v, successor
+            beta = min(beta, tempval)
+            cache[str_state] = (v, current_depth, best)
+        return v, best
+
+    def utility(self, max_player):
+        if max_player:
+            return + math.inf
+        else:
+            return - math.inf
+
+    def cutoff(self, state, depth):
+        if state.depth == depth:
+            return True
+        else:
+            return False
+
+    def sort_successors(self, successor_list, max_player):
+        sorted_dict = {}
+        index_list = []
+        sorted_successors = []
+        for successor in successor_list:
+            if successor in cache:
+                index = self.eval(successor, max_player)
+                if index not in sorted_dict:
+                    sorted_dict[index] = [successor]
+                    index_list.append(index)
+                else:
+                    sorted_dict[index].append(successor)
+        sorted_indexes = sorted(index_list)
+        for index in sorted_indexes:
+            sorted_successors.extend(sorted_dict[index])
+        return sorted_successors
+
+    def eval(self, state, max_player):
+        board = state.board
+        if max_player:
+            optimization_factor = 0
+            for piece_pos in state.board.pdict['R']:
+                optimization_factor += self.capturing_potential(piece_pos,
+                                                                state.board.pdict,
+                                                                max_player)
+            return board.red_pieces + board.red_kings * 2 - board.black_pieces \
+                   - board.black_kings * 2 + optimization_factor
+        else:
+            optimization_factor = 0
+            for piece_pos in state.board.pdict['B']:
+                optimization_factor += self.capturing_potential(piece_pos,
+                                                                state.board.pdict,
+                                                                max_player)
+            return board.black_pieces + board.black_kings * 2 - \
+                   board.red_pieces - board.red_kings * 2 + optimization_factor
+
+    def capturing_potential(self, piece_pos, pdict, max_player):
+        # we want to optimize for catching pieces
+        if max_player:
+            row, lcol = piece_pos[0], piece_pos[1]
+            if (row - 1, lcol - 1) in pdict['b'] or (row - 1, lcol - 1) in \
+                    pdict['B']:
+                return 1
+            elif (row - 1, lcol + 1) in pdict['b'] or (row - 1, lcol + 1) in \
+                    pdict['B']:
+                return 1
+            elif (row - 1, lcol + 1) in pdict['r'] or (row - 1, lcol + 1) in \
+                    pdict['R']:
+                return -1
+            else:
+                return 0
+        else:
+            row, lcol = piece_pos[0], piece_pos[1]
+            if (row + 1, lcol - 1) in pdict['r'] or (row + 1, lcol - 1) in \
+                    pdict['R']:
+                return 1
+            elif (row + 1, lcol + 1) in pdict['r'] or (row + 1, lcol + 1) in \
+                    pdict['R']:
+                return 1
+            elif (row - 1, lcol + 1) in pdict['b'] or (row - 1, lcol + 1) in \
+                    pdict['B']:
+                return -1
+            else:
+                return 0
 
     def get_children(self, state, player):
         parent_board = state.board
         children = []
-        moves = self.get_all_moves(parent_board, player)
+        if player:
+            piece = 'r'
+        else:
+            piece = 'b'
+        moves = self.get_all_moves(parent_board, piece)
         for move in moves:
+            piece = move[1]
+            old_key = move[0]
             for new_pos in moves[move]:
                 new_dict = deepcopy(parent_board.pdict)
                 # need to make the key changes
-                # move is the new key and values is the keys to remove
-                if move[0] in new_dict[move[1]]:
-                    new_dict[move[1]].remove(move[0])
-                if move[0] == 0 and player == 'r':
-                    player = 'R'
-                    new_dict['r'].remove(move)
-                if move[0] == 7 and player == 'b':
-                    player = 'B'
-                    new_dict['b'].remove(move)
-                new_dict[move[1]].add(new_pos)
+                # new_pos is the key to be added
+                if old_key in new_dict[piece]:
+                    new_dict[piece].remove(old_key)
+                # Kinging the r
+                if old_key == 0 and piece == 'r':
+                    new_dict['R'].add(new_pos)
+                # Kinging the b
+                elif move[0] == 7 and piece == 'b':
+                    new_dict['B'].add(new_pos)
+                else:
+                    new_dict[piece].add(new_pos)
                 for val in moves[move][new_pos]:
                     # removes the captured values
                     if val in new_dict['b']:
@@ -427,11 +582,14 @@ class Game:
                         new_dict['r'].remove(val)
                     elif val in new_dict['R']:
                         new_dict['R'].remove(val)
-                newBoard = Board(grid=parent_board.grid)
-                newBoard.pdict = new_dict
-                newBoard.grid = newBoard.dict_to_grid(new_dict)
-                child = State(newBoard, state)
-                children.append(child)
+                # creating the new board's grid
+                new_grid = self._dict_to_grid(new_dict)
+                # default is red, we update in the parent function
+                newBoard = Board(new_grid)
+                if newBoard.grid_to_str() not in cache:
+                    child = State(newBoard, state.depth + 1, state)
+                    state.child = child
+                    children.append(child)
         return children
 
     def get_all_moves(self, board, player):
@@ -439,15 +597,18 @@ class Game:
         Returns all possible moves for the current board state
         """
         moves = {}
+        # Implemented node ordering by getting moves for king first as py dict
+        # is ordered
+        # get moves for the king
+        for piece in board.pdict[player.upper()]:
+            # get all valid moves for the piece
+            possible_moves = board.get_piece_moves(player.upper(), piece)
+            moves[(piece, player.upper())] = self.forced_capture(possible_moves)
         # gets moves for each piece
         for piece in board.pdict[player]:
             # get all valid moves for the piece
             possible_moves = board.get_piece_moves(player, piece)
             moves[(piece, player)] = self.forced_capture(possible_moves)
-        # get moves for the king too
-        for piece in board.pdict[player.upper()]:
-            # get all valid moves for the piece
-            moves[(piece, player.upper())] = board.get_piece_moves(player, piece)
         return moves
 
     @staticmethod
@@ -462,6 +623,24 @@ class Game:
             return capturing_moves
         else:
             return moves
+
+    @staticmethod
+    def _dict_to_grid(pdict):
+        """
+        Converts a dictionary representation to a grid
+        """
+        grid = [['.', '.', '.', '.', '.', '.', '.', '.'],
+                ['.', '.', '.', '.', '.', '.', '.', '.'],
+                ['.', '.', '.', '.', '.', '.', '.', '.'],
+                ['.', '.', '.', '.', '.', '.', '.', '.'],
+                ['.', '.', '.', '.', '.', '.', '.', '.'],
+                ['.', '.', '.', '.', '.', '.', '.', '.'],
+                ['.', '.', '.', '.', '.', '.', '.', '.'],
+                ['.', '.', '.', '.', '.', '.', '.', '.']]
+        for key in pdict:
+            for piece in pdict[key]:
+                grid[piece[0]][piece[1]] = key
+        return grid
 
 
 def get_opp_char(player):
@@ -479,7 +658,6 @@ def get_next_turn(curr_turn):
 
 
 def read_from_file(filename):
-
     f = open(filename)
     lines = f.readlines()
     board = [[str(x) for x in l.rstrip()] for l in lines]
@@ -488,8 +666,34 @@ def read_from_file(filename):
     return board
 
 
-if __name__ == '__main__':
+def write_to_file(filename, paths):
+    puzzle_file = open(filename, "w")
+    for path in paths:
+        # row 1
+        puzzle_file.write(path[0:7])
+        puzzle_file.write("\n")
+        # row 2
+        puzzle_file.write(path[7:14])
+        puzzle_file.write("\n")
+        # row 3
+        puzzle_file.write(path[14:21])
+        puzzle_file.write("\n")
+        # row 4
+        puzzle_file.write(path[21:28])
+        puzzle_file.write("\n")
+        # row 5
+        puzzle_file.write(path[28:35])
+        puzzle_file.write("\n")
+        # row 6
+        puzzle_file.write(path[35:42])
+        puzzle_file.write("\n")
+        # row 7
+        puzzle_file.write(path[42:49])
+        puzzle_file.write("\n")
+        puzzle_file.write("\n")
 
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--inputfile",
@@ -506,10 +710,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     initial_board = read_from_file(args.inputfile)
-    state = State(initial_board)
+    state1 = State(initial_board, 0)
+    game = Game()
     turn = 'r'
     ctr = 0
+    start_time = time.perf_counter()
+    result = game.alphabeta_max_node(state1, True, -math.inf, +math.inf, 10, start_time)
+    #result = game.alphabeta(state1, 10, True, -math.inf, +math.inf)
+    write_to_file(args.outputfile, result.path())
 
     sys.stdout = open(args.outputfile, 'w')
 
     sys.stdout = sys.__stdout__
+
