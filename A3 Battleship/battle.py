@@ -1,5 +1,6 @@
 import argparse
 import sys
+from copy import copy, deepcopy
 from csp import *
 from constraints import *
 
